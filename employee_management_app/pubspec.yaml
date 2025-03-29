@@ -1,0 +1,36 @@
+name: employee_management_app
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Tambahan untuk fitur cerdas
+  fl_chart: ^0.70.2 # Untuk visualisasi data
+  syncfusion_flutter_charts: ^29.1.33 # Chart alternatif dengan lebih banyak fitur
+  geolocator: ^13.0.3 # Untuk pelacakan lokasi
+  flutter_local_notifications: ^19.0.0 # Untuk notifikasi lokal
+  ml_algo: ^16.17.13 # Untuk algoritma machine learning sederhana
+  tflite_flutter: ^0.11.0 # Untuk implementasi model ML
+
+  # Tambahan dependencies lainnya yang dibutuhkan
+  http: ^1.3.0
+  provider: ^6.1.2
+  shared_preferences: ^2.5.2
+  intl: ^0.20.2
+  flutter_dotenv: ^5.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
