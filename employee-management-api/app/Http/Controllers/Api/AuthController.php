@@ -3,90 +3,72 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+   // Login User
+public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (!Auth::attempt($credentials)) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
 
-    public function login(Request $request): JsonResponse
+    $user = Auth::user();
+    
+    // 🔥 Pastikan token dihasilkan dengan metode ini
+    $token = $user->createToken('authToken')->plainTextToken;
+
+    return response()->json([
+        'user' => $user,
+        'token' => $token // HARUS STRING, BUKAN true
+    ]);
+}
+
+// Register User
+public function register(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+    ]);
+
+    // 🔥 Pastikan token dihasilkan dengan benar
+    $token = $user->createToken('authToken')->plainTextToken;
+
+    return response()->json([
+        'user' => $user,
+        'token' => $token // HARUS STRING
+    ], 201);
+}
+
+
+    // Get Authenticated User
+    public function user(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $credentials = $request->only('email', 'password');
-        $token = Auth::attempt($credentials);
-
-        if (!$token) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        $user = Auth::user();
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-            'token' => $token,
-        ]);
+        return response()->json($request->user());
     }
 
-    public function register(Request $request): JsonResponse
+    // Logout User
+    public function logout(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+        $request->user()->tokens()->delete();
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $token = Auth::login($user);
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-            'token' => $token,
-        ], 201);
-    }
-
-    public function logout(): JsonResponse
-    {
-        Auth::logout();
-        return response()->json([
-            'message' => 'Successfully logged out',
-        ]);
-    }
-
-    public function user(): JsonResponse
-    {
-        return response()->json(Auth::user());
+        return response()->json(['message' => 'Logged out successfully']);
     }
 }

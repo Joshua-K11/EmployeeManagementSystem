@@ -14,6 +14,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuth => _user != null;
 
+  /// Fungsi **Login**
   Future<void> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
@@ -25,17 +26,26 @@ class AuthProvider with ChangeNotifier {
         body: json.encode({'email': email, 'password': password}),
       );
 
+      // Debugging: Print response dari API Laravel
+      print('Response from API: ${response.body}');
+
       final responseData = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        _user = User.fromJson(responseData);
+        // Pastikan token tersedia dalam respons API
+        if (responseData.containsKey('token') &&
+            responseData['token'] != null) {
+          _user = User.fromJson(responseData);
 
-        // Save token to SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', _user!.token);
+          // Simpan token ke SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', _user!.token);
 
-        _isLoading = false;
-        notifyListeners();
+          _isLoading = false;
+          notifyListeners();
+        } else {
+          throw Exception('Token tidak ditemukan dalam respons API');
+        }
       } else {
         _isLoading = false;
         notifyListeners();
@@ -48,6 +58,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Fungsi **Register**
   Future<void> register(
     String name,
     String email,
@@ -69,17 +80,24 @@ class AuthProvider with ChangeNotifier {
         }),
       );
 
+      print('Response from API (Register): ${response.body}');
+
       final responseData = json.decode(response.body);
 
       if (response.statusCode == 201) {
-        _user = User.fromJson(responseData);
+        // Pastikan token tersedia
+        if (responseData.containsKey('token') &&
+            responseData['token'] != null) {
+          _user = User.fromJson(responseData);
 
-        // Save token to SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', _user!.token);
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', _user!.token);
 
-        _isLoading = false;
-        notifyListeners();
+          _isLoading = false;
+          notifyListeners();
+        } else {
+          throw Exception('Token tidak ditemukan dalam respons API');
+        }
       } else {
         _isLoading = false;
         notifyListeners();
@@ -92,6 +110,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// **Coba Auto Login**
   Future<bool> tryAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey('token')) {
@@ -108,6 +127,8 @@ class AuthProvider with ChangeNotifier {
           'Authorization': 'Bearer $token',
         },
       );
+
+      print('Response from API (AutoLogin): ${response.body}');
 
       if (response.statusCode == 200) {
         final userData = json.decode(response.body);
@@ -127,9 +148,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// **Logout**
   Future<void> logout() async {
     _user = null;
-
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
 
