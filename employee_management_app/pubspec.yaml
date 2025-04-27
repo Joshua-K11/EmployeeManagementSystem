@@ -16,7 +16,7 @@ dependencies:
   fl_chart: ^0.70.2 # Untuk visualisasi data
   syncfusion_flutter_charts: ^29.1.33 # Chart alternatif dengan lebih banyak fitur
   geolocator: ^13.0.3 # Untuk pelacakan lokasi
-  flutter_local_notifications: ^19.0.0 # Untuk notifikasi lokal
+  flutter_local_notifications: ^19.1.0 # Untuk notifikasi lokal
   ml_algo: ^16.17.13 # Untuk algoritma machine learning sederhana
   tflite_flutter: ^0.11.0 # Untuk implementasi model ML
 
