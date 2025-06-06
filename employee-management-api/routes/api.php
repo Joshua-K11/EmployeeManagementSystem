@@ -16,8 +16,8 @@ Route::get('/test', function () {
 });
 
 // Route autentikasi
-Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
 // Route yang memerlukan autentikasi
 Route::middleware('auth:sanctum')->group(function () {
